@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:workshop_state_management/cart_item.dart';
+import 'package:provider/provider.dart';
+import 'package:workshop_state_management/cart_viewmodel.dart';
 import 'package:workshop_state_management/products.dart';
 import 'package:collection/collection.dart';
+
+import 'widgets/clear_button.dart';
+import 'widgets/plus_button.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -11,10 +15,9 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  List<CartItem> cartItemList = [];
-
   @override
   Widget build(BuildContext context) {
+    var cartItemList = context.watch<CartViewModel>().cartItemList;
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -22,6 +25,12 @@ class _HomePageState extends State<HomePage> {
         ),
         centerTitle: false,
         actions: [
+          IconButton(
+            onPressed: () {
+              context.read<CartViewModel>().clearCart();
+            },
+            icon: const Icon(Icons.clear),
+          ),
           Center(
             child: Stack(
               clipBehavior: Clip.none,
@@ -76,25 +85,21 @@ class _HomePageState extends State<HomePage> {
                         child: Text(products[index]),
                       ),
                     ),
-                    TextButton(
+                    PlusButton(
                       onPressed: () {
                         if (cartItemList.firstWhereOrNull(
                               (item) => item.product == products[index],
                             ) ==
                             null) {
-                          setState(() {
-                            cartItemList.add(CartItem(products[index], 1));
-                          });
+                          context
+                              .read<CartViewModel>()
+                              .addToCart(products[index]);
                         } else {
-                          var item = cartItemList.firstWhere(
-                              (item) => item.product == products[index]);
-
-                          setState(() {
-                            item.count += 1;
-                          });
+                          context
+                              .read<CartViewModel>()
+                              .increaseCount(products[index]);
                         }
                       },
-                      child: const Text("+"),
                     ),
                     Text(cartItemList
                             .firstWhereOrNull(
@@ -106,48 +111,15 @@ class _HomePageState extends State<HomePage> {
                     const TextButton(
                       onPressed: null,
                       child: Text("-"),
-                    )
+                    ),
                   ],
                 );
               },
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: TextButton(
-              onPressed: () {
-                setState(() {
-                  cartItemList.clear();
-                });
-              },
-              child: const Text("Sepeti Boşalt"),
-            ),
-          ),
+          const ClearButton(),
         ],
       ),
     );
-  }
-
-  addToCart(String product) {
-    setState(() {
-      cartItemList.add(CartItem(product, 1));
-    });
-  }
-
-  increaseCount(String product) {
-    var currentItem =
-        cartItemList.firstWhere((item) => item.product == product);
-
-    setState(() {
-      currentItem.count += 1;
-    });
-  }
-
-  removeFromCart() {
-    // ...
-  }
-
-  decreaseCount() {
-    // ...
   }
 }

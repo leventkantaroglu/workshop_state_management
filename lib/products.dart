@@ -1,7 +1,7 @@
 const List<String> products = [
   "Süt",
   "Tereyağı",
-  "Zeyin",
+  "Zeytin",
   "Un",
   "Türk Kahvesi",
   "Tahin",
